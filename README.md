@@ -113,7 +113,7 @@ proyecto/
 
 - Android Studio Arctic Fox o superior  
 - JDK 11+  
-- Android SDK 24+  
+- Android SDK 26+  
 - Gradle 7+  
 - Node.js 18+ *(para el backend)*
 

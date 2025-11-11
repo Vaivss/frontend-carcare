@@ -43,6 +43,8 @@ import androidx.compose.ui.res.painterResource
 import java.time.format.DateTimeFormatter
 import eina.unizar.frontend.viewmodels.HomeViewModel
 import eina.unizar.frontend.models.toVehiculo
+import eina.unizar.frontend.notifications.NotificationScheduler
+import java.util.Calendar
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -614,12 +616,44 @@ fun NuevaReservaScreen(
                                 ) {
                                     isLoading = false
                                     if (response.isSuccessful) {
+                                        val reservaCreada = response.body()
+                                        
                                         scope.launch(Dispatchers.Main) {
                                             Toast.makeText(
                                                 context,
                                                 "Reserva creada exitosamente",
                                                 Toast.LENGTH_SHORT
                                             ).show()
+                                            // Programar notificación 1 hora antes de la reserva
+                                            reservaCreada?.let { reserva ->
+                                                try {
+                                                    // Combinar fecha y hora de inicio
+                                                    val fechaHoraReserva = Calendar.getInstance().apply {
+                                                        set(Calendar.YEAR, fechaInicio.year)
+                                                        set(Calendar.MONTH, fechaInicio.monthValue - 1)
+                                                        set(Calendar.DAY_OF_MONTH, fechaInicio.dayOfMonth)
+                                                        
+                                                        // Parsear hora de inicio (formato "HH:mm")
+                                                        val horaPartes = horaInicio.split(":")
+                                                        set(Calendar.HOUR_OF_DAY, horaPartes[0].toInt())
+                                                        set(Calendar.MINUTE, horaPartes[1].toInt())
+                                                        set(Calendar.SECOND, 0)
+                                                        set(Calendar.MILLISECOND, 0)
+                                                    }
+                                                    
+                                                    // Programar la notificación
+                                                    NotificationScheduler.scheduleReservationNotification(
+                                                        context = context,
+                                                        reservationId = reserva.id,
+                                                        reservationDateTime = fechaHoraReserva.time,
+                                                        serviceName = "${vehiculo.nombre} - ${tipoSeleccionado.nombre}"
+                                                    )
+                                                    
+                                                    Log.d("CrearReserva", "Notificación programada para reserva ${reserva.id}")
+                                                } catch (e: Exception) {
+                                                    Log.e("CrearReserva", "Error al programar notificación", e)
+                                                }
+                                            }
                                             onCrearReserva(
                                                 NuevaReservaData(
                                                     vehiculoId = vehiculo.id,
@@ -641,14 +675,14 @@ fun NuevaReservaScreen(
                                     }
                                 }
 
-                                override fun onFailure(call: Call<ReservaResponse>, t: Throwable) {
-                                    isLoading = false
-                                    Log.e("CrearReserva", "Error de conexión", t)
-                                    scope.launch(Dispatchers.Main) {
-                                        errorMessage = "Error de conexión: ${t.message}"
-                                    }
-                                }
-                            })
+        override fun onFailure(call: Call<ReservaResponse>, t: Throwable) {
+            isLoading = false
+            Log.e("CrearReserva", "Error de conexión", t)
+            scope.launch(Dispatchers.Main) {
+                errorMessage = "Error de conexión: ${t.message}"
+            }
+        }
+    })
                     }
                 },
                 modifier = Modifier

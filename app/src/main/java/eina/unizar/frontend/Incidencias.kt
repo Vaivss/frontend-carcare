@@ -104,7 +104,7 @@ fun IncidenciasScreen(
     onAddIncidenciaClick: () -> Unit,
     navController: NavHostController
 ) {
-    var tabSeleccionada by remember { mutableStateOf(0) } // 0: Activas, 1: Resueltas
+    var tabSeleccionada by remember { mutableIntStateOf(0) } // 0: Activas, 1: Resueltas
     val currentRoute = navController.currentBackStackEntry?.destination?.route
 
     Scaffold(

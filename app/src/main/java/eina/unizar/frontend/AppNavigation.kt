@@ -32,7 +32,7 @@ import eina.unizar.frontend.models.VehiculoDetalle
 import eina.unizar.frontend.models.toVehiculo
 import eina.unizar.frontend.models.toVehiculoDetalle
 import eina.unizar.frontend.viewmodels.HomeViewModel
-
+import android.content.Intent
 
 /**
  * Composable principal que gestiona la navegación entre pantallas.
@@ -55,10 +55,40 @@ import eina.unizar.frontend.viewmodels.HomeViewModel
 @SuppressLint("ContextCastToActivity")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AppNavigation() {
+fun AppNavigation(intent: Intent? = null) {
     val navController = rememberNavController()
     val context = LocalContext.current
     val activity = context as ComponentActivity
+
+    LaunchedEffect(intent) {
+        intent?.let {
+            val navigateTo = it.getStringExtra("navigate_to")
+            Log.d("AppNavigation", "Navegación desde notificación: $navigateTo")
+
+            when (navigateTo) {
+                "reservation_detail" -> {
+                    val reservationId = it.getIntExtra("reservation_id", -1)
+                    if (reservationId != -1) {
+                        Log.d("AppNavigation", "Navegando a reserva: $reservationId")
+                        navController.navigate("home") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                        navController.navigate("reservas")
+                    }
+                }
+                "maintenance_detail" -> {
+                    val maintenanceId = it.getIntExtra("maintenance_id", -1)
+                    if (maintenanceId != -1) {
+                        Log.d("AppNavigation", "Navegando a mantenimiento: $maintenanceId")
+                        navController.navigate("home") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                        navController.navigate("incidencias")
+                    }
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         val sharedPrefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)

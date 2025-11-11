@@ -30,7 +30,9 @@ import eina.unizar.frontend.viewmodels.AuthViewModel
 import android.content.Context
 import android.app.Application
 import androidx.compose.ui.platform.LocalContext
-
+import eina.unizar.frontend.notifications.NotificationPreferences
+import eina.unizar.frontend.notifications.NotificationScheduler
+import java.util.Calendar
 
 enum class EstadoVehiculo(val color: Color, val texto: String) {
     DISPONIBLE(Color(0xFF10B981), "Disponible"),
@@ -498,6 +500,14 @@ fun PerfilMenu(
     navController: NavHostController
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    
+    var reservationNotificationsEnabled by remember {
+        mutableStateOf(NotificationPreferences.areReservationNotificationsEnabled(context))
+    }
+    var maintenanceNotificationsEnabled by remember {
+        mutableStateOf(NotificationPreferences.areMaintenanceNotificationsEnabled(context))
+    }
 
     Box(
         modifier = Modifier
@@ -523,6 +533,98 @@ fun PerfilMenu(
                     navController.navigate("invitaciones")
                 }
             )
+            
+            Divider()
+            
+            // Título de notificaciones
+            DropdownMenuItem(
+                text = { 
+                    Text(
+                        "Notificaciones",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = Color(0xFF6B7280)
+                    ) 
+                },
+                onClick = { }
+            )
+            
+            // Notificaciones de Reservas
+            DropdownMenuItem(
+                text = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Reservas", fontSize = 14.sp)
+                            Text(
+                                "1h antes de la cita",
+                                fontSize = 11.sp,
+                                color = Color(0xFF9CA3AF)
+                            )
+                        }
+                        Checkbox(
+                            checked = reservationNotificationsEnabled,
+                            onCheckedChange = { enabled ->
+                                reservationNotificationsEnabled = enabled
+                                NotificationPreferences.setReservationNotificationsEnabled(context, enabled)
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = Color(0xFFEF4444)
+                            )
+                        )
+                    }
+                },
+                onClick = {
+                    reservationNotificationsEnabled = !reservationNotificationsEnabled
+                    NotificationPreferences.setReservationNotificationsEnabled(
+                        context,
+                        reservationNotificationsEnabled
+                    )
+                }
+            )
+            
+            // Notificaciones de Mantenimiento
+            DropdownMenuItem(
+                text = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Mantenimientos", fontSize = 14.sp)
+                            Text(
+                                "Cuando toque revisión",
+                                fontSize = 11.sp,
+                                color = Color(0xFF9CA3AF)
+                            )
+                        }
+                        Checkbox(
+                            checked = maintenanceNotificationsEnabled,
+                            onCheckedChange = { enabled ->
+                                maintenanceNotificationsEnabled = enabled
+                                NotificationPreferences.setMaintenanceNotificationsEnabled(context, enabled)
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = Color(0xFFEF4444)
+                            )
+                        )
+                    }
+                },
+                onClick = {
+                    maintenanceNotificationsEnabled = !maintenanceNotificationsEnabled
+                    NotificationPreferences.setMaintenanceNotificationsEnabled(
+                        context,
+                        maintenanceNotificationsEnabled
+                    )
+                }
+            )
+            
+            Divider()
+            
             DropdownMenuItem(
                 text = { Text("Cerrar Sesión") },
                 onClick = {

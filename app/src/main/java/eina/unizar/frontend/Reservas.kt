@@ -419,11 +419,9 @@ fun CalendarioMensual(
     onDiaClick: (LocalDate) -> Unit
 ) {
     val primerDiaDelMes = mes.atDay(1)
-    var diaDeLaSemanaInicio = (primerDiaDelMes.dayOfWeek.value + 5) % 7
-
-    if (mes == YearMonth.of(2025, 10)) {
-        diaDeLaSemanaInicio = 2
-    }
+    // dayOfWeek.value devuelve: 1=Lunes, 2=Martes, ..., 7=Domingo
+    // Necesitamos convertir a: 0=Lunes, 1=Martes, ..., 6=Domingo
+    val diaDeLaSemanaInicio = primerDiaDelMes.dayOfWeek.value - 1
 
     val diasEnMes = mes.lengthOfMonth()
     val totalCeldas = ((diasEnMes + diaDeLaSemanaInicio + 6) / 7) * 7
@@ -486,7 +484,6 @@ fun CalendarioMensual(
                                 val tieneReservas = reservasDelDia.isNotEmpty()
                                 val esSeleccionado = fecha == diaSeleccionado
                                 val esHoy = fecha == LocalDate.now()
-
                                 // Obtener color del primer vehículo si hay reservas
                                 val colorVehiculo = if (reservasDelDia.isNotEmpty()) {
                                     getColorForVehiculo(reservasDelDia.first().vehiculoId)

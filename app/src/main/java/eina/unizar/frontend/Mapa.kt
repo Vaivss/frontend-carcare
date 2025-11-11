@@ -64,7 +64,7 @@ fun UbicacionVehiculoScreen(
     Log.d("Mapa", "Vehículos obtenidos: ${vehiculos.size}")
 
     // Estado para el vehículo seleccionado y referencia al mapa
-    var selectedIndex by remember { mutableStateOf(0) }
+    var selectedIndex by remember { mutableIntStateOf(0) }
     val selectedVehiculo = vehiculos.getOrNull(selectedIndex)
     var mapLibreMap by remember { mutableStateOf<MapLibreMap?>(null) }
     var shouldCenterMap by remember { mutableStateOf(false) }
